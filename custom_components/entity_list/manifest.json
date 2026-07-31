@@ -2,11 +2,11 @@
   "domain": "entity_list",
   "name": "Entity List",
   "version": "1.3.0",
-  "documentation": "https://github.com/yourname/entity_list",
-  "issue_tracker": "https://github.com/yourname/entity_list/issues",
+  "documentation": "https://github.com/baxgit/ha_entity_list",
+  "issue_tracker": "https://github.com/baxgit/ha_entity_list/issues",
   "config_flow": true,
   "requirements": [],
-  "codeowners": ["@yourgithub"],
+  "codeowners": ["@baxgit"],
   "iot_class": "local_push",
   "frontend": true
 }
