@@ -1,0 +1,99 @@
+{
+  "title": "Entity List",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Create an Entity List",
+        "description": "Create a new list entity. Choose Standard for a simple named list, or Alert for a list with new/active/cleared status tracking and notifications.",
+        "data": {
+          "list_id": "List ID (lowercase, no spaces)",
+          "name": "Name",
+          "description": "Description",
+          "list_type": "List type",
+          "sort_order": "Sort order",
+          "max_size": "Max list size (number)",
+          "max_size_entity": "Max list size (entity)"
+        },
+        "data_description": {
+          "max_size": "Optional. Once the list holds this many items, adding a new one removes the oldest. Leave blank for no limit.",
+          "max_size_entity": "Optional, and only if you'd rather set the cap from an input_number or counter entity than a fixed number here. If both this and the number above are set, this entity wins."
+        }
+      },
+      "alert_targets": {
+        "title": "Notification targets",
+        "description": "Choose up to two notify entities (for example your phone's companion app) to alert when a new item is created on this list.",
+        "data": {
+          "notify_targets": "Notify targets"
+        }
+      },
+      "reconfigure": {
+        "title": "Change list ID",
+        "description": "Fix a typo in this list's ID without deleting and recreating it. Existing items carry over. Name, description, sort order, notify targets, and max size are edited via the Configure button instead.",
+        "data": {
+          "list_id": "List ID (lowercase, no spaces)"
+        }
+      }
+    },
+    "error": {
+      "too_many_targets": "Choose at most two notify targets.",
+      "invalid_list_id": "List ID must be lowercase letters, numbers, and underscores only (no spaces).",
+      "max_size_conflict": "Set either a fixed max size or an entity reference, not both."
+    },
+    "abort": {
+      "already_configured": "A list with this ID already exists.",
+      "reconfigure_successful": "List ID updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit list settings",
+        "description": "The list ID and list type cannot be changed here \u2014 use Reconfigure for the list ID (list type can never be changed).",
+        "data": {
+          "name": "Name",
+          "description": "Description",
+          "sort_order": "Sort order",
+          "max_size": "Max list size (number)",
+          "max_size_entity": "Max list size (entity)",
+          "notify_targets": "Notify targets"
+        },
+        "data_description": {
+          "max_size": "Optional. Once the list holds this many items, adding a new one removes the oldest. Leave blank for no limit.",
+          "max_size_entity": "Optional, and only if you'd rather set the cap from an input_number or counter entity than a fixed number here. If both this and the number above are set, this entity wins."
+        }
+      }
+    },
+    "error": {
+      "too_many_targets": "Choose at most two notify targets.",
+      "max_size_conflict": "Set either a fixed max size or an entity reference, not both."
+    }
+  },
+  "selector": {
+    "list_type": {
+      "options": {
+        "standard": "Standard list",
+        "alert": "Alert list"
+      }
+    },
+    "sort_order": {
+      "options": {
+        "newest_first": "Newest first",
+        "oldest_first": "Oldest first",
+        "status": "Status (new \u2192 active \u2192 cleared)"
+      }
+    },
+    "notify_on_create": {
+      "options": {
+        "none": "None",
+        "persistent": "Persistent notification",
+        "app": "App push notification"
+      }
+    }
+  },
+  "issues": {
+    "stale_notify_target": {
+      "title": "Notify target not found",
+      "description": "The notify target `{target}` configured for the \"{list_name}\" list could not be found. Open the list's Configure options and update its notify targets."
+    }
+  }
+}

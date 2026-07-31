@@ -1,0 +1,136 @@
+add_item:
+  name: Add item to list
+  description: >-
+    Add a new item to an Entity List. On alert-type lists the item is created
+    with status "Active (new)"; on standard lists there is no status concept.
+  fields:
+    list_id:
+      name: Entity List
+      description: The list to add the item to.
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
+
+    name:
+      name: Item name
+      description: Name of the item. Adding an item with a name that already exists replaces it.
+      required: true
+      example: Milk
+      selector:
+        text:
+
+    type:
+      name: Item type
+      description: Optional category or type.
+      required: false
+      example: Grocery
+      selector:
+        text:
+
+    description:
+      name: Item description
+      description: Optional free-text details about the item.
+      required: false
+      example: 2% milk, the blue carton
+      selector:
+        text:
+
+    url:
+      name: Dashboard link
+      description: Optional link to a Lovelace dashboard or external page.
+      required: false
+      selector:
+        text:
+          type: url
+
+    high_priority:
+      name: High priority
+      description: Alert-type lists only. Marks the item as high priority and flags it in the item's notification title.
+      required: false
+      default: false
+      selector:
+        boolean:
+
+    notify_on_create:
+      name: Notify on create
+      description: Alert-type lists only. Whether creating this item should trigger a notification, and via which channel.
+      required: false
+      default: none
+      selector:
+        select:
+          translation_key: notify_on_create
+          options:
+            - none
+            - persistent
+            - app
+
+remove_item:
+  name: Remove item from list
+  description: Remove a specific item from a list.
+  fields:
+    list_id:
+      name: Entity List
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
+
+    item_name:
+      name: Item name
+      description: Name of the item to remove.
+      required: true
+      selector:
+        text:
+
+acknowledge_new_item:
+  name: Acknowledge new item
+  description: Alert-type lists only. Change an item's status from "Active (new)" to "Active".
+  fields:
+    list_id:
+      name: Entity List
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
+
+    item_name:
+      name: Item name
+      description: Name of the item to acknowledge.
+      required: true
+      selector:
+        text:
+
+clear_active_alert:
+  name: Clear active alert
+  description: Alert-type lists only. Change an item's status to "Cleared" and record the timestamp.
+  fields:
+    list_id:
+      name: Entity List
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
+
+    item_name:
+      name: Item name
+      description: Name of the item to clear.
+      required: true
+      selector:
+        text:
+
+reset_list:
+  name: Clear list
+  description: Remove all items from a list.
+  fields:
+    list_id:
+      name: Entity List
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
