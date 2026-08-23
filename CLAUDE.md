@@ -111,6 +111,15 @@ interruption level. If HA closes this gap, `_send_alert_notification` in
 
 ## Recent changes
 
+- **v1.4.1**: The creation form's List type field now has helper text
+  (`data_description`) explaining that choosing Alert leads to a second
+  screen (notification targets) after submitting. Text-only change — no
+  behavior change. Note: HA's generic config-flow form renderer only
+  supports a `description` block above the form and per-field
+  `data_description` helper text below each individual field; there's no
+  native slot for a message pinned below the whole form, so this was
+  attached to the `list_type` field specifically since that's the field
+  the note is actually about.
 - **v1.4.0**:
   - `clear_active_alert` now accepts an optional `description` field that
     overwrites the item's description at the same time it's cleared.

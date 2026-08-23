@@ -27,6 +27,10 @@ underscores, and de-duplicated with a numeric suffix if that id is already
 taken). Provide your own List ID instead if you want a stable id that
 doesn't track the name, or a particular id for use in automations/scripts.
 
+If you choose **Alert** as the list type, note that notification targets
+are set up on a second screen shown after you submit this one — a hint to
+that effect appears under the List type field.
+
 ## Sensor state
 
 - **Standard lists**: state = total number of items.
