@@ -16,6 +16,7 @@
         },
         "data_description": {
           "list_id": "Optional. Leave blank to generate one automatically from the name.",
+          "list_type": "If you choose Alert, you'll set up notification targets on the next screen after submitting this one.",
           "max_size": "Optional. Once the list holds this many items, adding a new one removes the oldest. Leave blank for no limit.",
           "max_size_entity": "Optional, and only if you'd rather set the cap from an input_number or counter entity than a fixed number here. If both this and the number above are set, this entity wins."
         }
