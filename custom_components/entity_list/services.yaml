@@ -123,6 +123,67 @@ clear_active_alert:
       selector:
         text:
 
+    description:
+      name: Item description
+      description: Optional. If provided, replaces the item's existing description as it's cleared (for example, to record resolution notes).
+      required: false
+      selector:
+        text:
+
+update_item:
+  name: Update item
+  description: >-
+    Update the fields of an existing item, identified by its current name.
+    Every field is optional - only the fields you provide are overwritten,
+    everything else on the item is left as-is. The item's name itself
+    cannot be changed with this service.
+  fields:
+    list_id:
+      name: Entity List
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: entity_list
+
+    item_name:
+      name: Item name
+      description: Name of the existing item to update.
+      required: true
+      selector:
+        text:
+
+    type:
+      name: Item type
+      description: Optional. New category or type for the item.
+      required: false
+      example: Grocery
+      selector:
+        text:
+
+    description:
+      name: Item description
+      description: Optional. New free-text details for the item.
+      required: false
+      example: 2% milk, the blue carton
+      selector:
+        text:
+
+    url:
+      name: Dashboard link
+      description: Optional. New link to a Lovelace dashboard or external page.
+      required: false
+      selector:
+        text:
+          type: url
+
+    high_priority:
+      name: High priority
+      description: Alert-type lists only. New high-priority flag for the item.
+      required: false
+      selector:
+        boolean:
+
 reset_list:
   name: Clear list
   description: Remove all items from a list.

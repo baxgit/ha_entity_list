@@ -6,9 +6,10 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
+from homeassistant.util import slugify
 
 from .const import (
     CONF_DESCRIPTION,
@@ -77,6 +78,28 @@ def _check_max_size_conflict(
         errors[CONF_MAX_SIZE_ENTITY] = "max_size_conflict"
 
 
+def _generate_list_id(hass: HomeAssistant, name: str) -> str:
+    """Derive a unique list_id from a list's name.
+
+    Used when the user leaves the List ID field blank at creation. Slugifies
+    the name and, if that collides with an existing list's id, appends an
+    incrementing numeric suffix until a unique id is found. Falls back to
+    "list" as the base if the name slugifies to nothing (e.g. emoji-only).
+    """
+    base = slugify(name) or "list"
+    existing = {
+        entry.data[CONF_LIST_ID] for entry in hass.config_entries.async_entries(DOMAIN)
+    }
+
+    if base not in existing:
+        return base
+
+    suffix = 2
+    while f"{base}_{suffix}" in existing:
+        suffix += 1
+    return f"{base}_{suffix}"
+
+
 class EntityListConfigFlow(config_entries.ConfigFlow, domain="entity_list"):
     """Handle creation of a new Entity List."""
 
@@ -91,11 +114,16 @@ class EntityListConfigFlow(config_entries.ConfigFlow, domain="entity_list"):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            list_id = user_input[CONF_LIST_ID].strip().lower()
-            try:
-                cv.slug(list_id)
-            except vol.Invalid:
-                errors[CONF_LIST_ID] = "invalid_list_id"
+            raw_list_id = user_input.get(CONF_LIST_ID, "").strip().lower()
+
+            if raw_list_id:
+                list_id = raw_list_id
+                try:
+                    cv.slug(list_id)
+                except vol.Invalid:
+                    errors[CONF_LIST_ID] = "invalid_list_id"
+            else:
+                list_id = _generate_list_id(self.hass, user_input[CONF_NAME])
 
             _check_max_size_conflict(user_input, errors)
 
@@ -125,8 +153,8 @@ class EntityListConfigFlow(config_entries.ConfigFlow, domain="entity_list"):
 
         schema = vol.Schema(
             {
-                vol.Required(CONF_LIST_ID): selector.TextSelector(),
                 vol.Required(CONF_NAME): str,
+                vol.Optional(CONF_LIST_ID, default=""): selector.TextSelector(),
                 vol.Optional(CONF_DESCRIPTION, default=""): str,
                 vol.Required(CONF_LIST_TYPE, default=LIST_TYPE_STANDARD): _list_type_selector(),
                 vol.Optional(CONF_SORT_ORDER, default=DEFAULT_SORT_ORDER): _sort_order_selector(),

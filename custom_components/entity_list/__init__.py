@@ -67,6 +67,25 @@ ITEM_NAME_SCHEMA = vol.Schema(
 
 LIST_ID_SCHEMA = vol.Schema({vol.Required(CONF_LIST_ID): cv.string})
 
+CLEAR_ALERT_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_LIST_ID): cv.string,
+        vol.Required("item_name"): cv.string,
+        vol.Optional("description"): cv.string,
+    }
+)
+
+UPDATE_ITEM_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_LIST_ID): cv.string,
+        vol.Required("item_name"): cv.string,
+        vol.Optional("type"): cv.string,
+        vol.Optional("description"): cv.string,
+        vol.Optional("url"): cv.string,
+        vol.Optional("high_priority"): cv.boolean,
+    }
+)
+
 
 def _signal(list_id: str) -> str:
     return SIGNAL_LIST_UPDATED.format(list_id=list_id)
@@ -94,7 +113,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     async def _send_alert_notification(config: dict, item: dict) -> None:
         title = config[CONF_NAME]
         if item.get("high_priority"):
-            title = f"\u26a0 High priority \u2014 {title}"
+            title = f"⚠ High priority — {title}"
 
         message = item["name"]
         if item.get("type"):
@@ -282,7 +301,42 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
                     item = item.copy()
                     item["status"] = STATUS_CLEARED
                     item["cleared_at"] = dt_util.utcnow().isoformat()
+                    if "description" in call.data:
+                        item["description"] = call.data["description"]
                     updated = True
+            new_items.append(item)
+
+        if updated:
+            lst["items"] = sort_items(
+                new_items, config.get(CONF_SORT_ORDER, DEFAULT_SORT_ORDER)
+            )
+            await storage.save()
+            async_dispatcher_send(hass, _signal(list_id))
+
+    async def update_item(call: ServiceCall) -> None:
+        list_id = resolve_list_id(hass, call.data[CONF_LIST_ID])
+        if list_id is None:
+            raise HomeAssistantError(f"Unknown entity list: {call.data[CONF_LIST_ID]}")
+        lst = _get_list(list_id)
+        entry = _get_entry(list_id)
+        config = effective_config(entry)
+        list_type = config[CONF_LIST_TYPE]
+
+        item_name_input = call.data["item_name"].strip().lower()
+        updated = False
+        new_items = []
+        for item in lst["items"]:
+            if item.get("name", "").strip().lower() == item_name_input:
+                item = item.copy()
+                if "type" in call.data:
+                    item["type"] = call.data["type"]
+                if "description" in call.data:
+                    item["description"] = call.data["description"]
+                if "url" in call.data:
+                    item["url"] = call.data["url"]
+                if list_type == LIST_TYPE_ALERT and "high_priority" in call.data:
+                    item["high_priority"] = call.data["high_priority"]
+                updated = True
             new_items.append(item)
 
         if updated:
@@ -306,7 +360,10 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         schema=ITEM_NAME_SCHEMA,
     )
     hass.services.async_register(
-        DOMAIN, "clear_active_alert", clear_active_alert, schema=ITEM_NAME_SCHEMA
+        DOMAIN, "clear_active_alert", clear_active_alert, schema=CLEAR_ALERT_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, "update_item", update_item, schema=UPDATE_ITEM_SCHEMA
     )
     return True
 
