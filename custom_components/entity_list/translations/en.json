@@ -6,8 +6,8 @@
         "title": "Create an Entity List",
         "description": "Create a new list entity. Choose Standard for a simple named list, or Alert for a list with new/active/cleared status tracking and notifications.",
         "data": {
-          "list_id": "List ID (lowercase, no spaces)",
           "name": "Name",
+          "list_id": "List ID (lowercase, no spaces)",
           "description": "Description",
           "list_type": "List type",
           "sort_order": "Sort order",
@@ -15,6 +15,7 @@
           "max_size_entity": "Max list size (entity)"
         },
         "data_description": {
+          "list_id": "Optional. Leave blank to generate one automatically from the name.",
           "max_size": "Optional. Once the list holds this many items, adding a new one removes the oldest. Leave blank for no limit.",
           "max_size_entity": "Optional, and only if you'd rather set the cap from an input_number or counter entity than a fixed number here. If both this and the number above are set, this entity wins."
         }
@@ -48,7 +49,7 @@
     "step": {
       "init": {
         "title": "Edit list settings",
-        "description": "The list ID and list type cannot be changed here \u2014 use Reconfigure for the list ID (list type can never be changed).",
+        "description": "The list ID and list type cannot be changed here — use Reconfigure for the list ID (list type can never be changed).",
         "data": {
           "name": "Name",
           "description": "Description",
@@ -79,7 +80,7 @@
       "options": {
         "newest_first": "Newest first",
         "oldest_first": "Oldest first",
-        "status": "Status (new \u2192 active \u2192 cleared)"
+        "status": "Status (new → active → cleared)"
       }
     },
     "notify_on_create": {
