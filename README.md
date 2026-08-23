@@ -19,6 +19,14 @@ Copy this `entity_list/` folder into your Home Assistant
 `config/custom_components/` directory, then restart Home Assistant.
 Add lists via **Settings → Devices & services → Add integration → Entity List**.
 
+## Creating a list
+
+Only **Name** is required. **List ID** is optional — leave it blank and one
+is generated automatically from the name (lowercased, spaces replaced with
+underscores, and de-duplicated with a numeric suffix if that id is already
+taken). Provide your own List ID instead if you want a stable id that
+doesn't track the name, or a particular id for use in automations/scripts.
+
 ## Sensor state
 
 - **Standard lists**: state = total number of items.
@@ -68,6 +76,7 @@ can't be changed even via Reconfigure — it determines the item schema.
 | --- | --- | --- |
 | `entity_list.add_item` | Add (or replace, by name) an item | no |
 | `entity_list.remove_item` | Delete an item by name | no |
+| `entity_list.update_item` | Overwrite one or more fields of an existing item, by name | no |
 | `entity_list.reset_list` | Clear all items | no |
 | `entity_list.acknowledge_new_item` | Move an item from `Active (new)` to `Active` | yes |
 | `entity_list.clear_active_alert` | Move an item to `Cleared`, stamping `cleared_at` | yes |
@@ -75,9 +84,22 @@ can't be changed even via Reconfigure — it determines the item schema.
 `add_item` additionally accepts `high_priority` (bool) and `notify_on_create`
 (`none` / `persistent` / `app`) — both are only meaningful on alert lists.
 
+`update_item` identifies the item by its current `item_name` and lets you
+overwrite `type`, `description`, `url`, and (alert lists only)
+`high_priority` — every field is optional, and only the ones you pass are
+changed; the rest of the item is left as-is. The item's `name` itself
+cannot be changed with this service. `notify_on_create` is deliberately
+not editable here — it's a one-time instruction for what to do at item
+creation, not persisted state worth overwriting later.
+
+`clear_active_alert` also accepts an optional `description`, which — if
+provided — replaces the item's description at the same time it's cleared
+(handy for recording resolution notes without a separate `update_item`
+call).
+
 ## Notifications
 
-Notifications only fire on item **creation**, never on acknowledge/clear.
+Notifications only fire on item **creation**, never on acknowledge/clear/update.
 
 - **Persistent**: creates a dismissible Home Assistant persistent
   notification with a stable ID

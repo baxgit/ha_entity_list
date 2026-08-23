@@ -19,10 +19,12 @@ creation time when the cap is exceeded).
 
 ```
 custom_components/entity_list/
-  __init__.py       services (add_item, remove_item, reset_list,
-                     acknowledge_new_item, clear_active_alert), setup/
-                     teardown of config entries, alert notification logic
-  config_flow.py     create/reconfigure/options flows
+  __init__.py       services (add_item, remove_item, update_item,
+                     reset_list, acknowledge_new_item, clear_active_alert),
+                     setup/teardown of config entries, alert notification
+                     logic
+  config_flow.py     create/reconfigure/options flows, list_id
+                     auto-generation
   const.py           all constant keys, enums, defaults
   helpers.py         effective_config, sort_items, max-size resolution,
                      list_id <-> entity_id resolution
@@ -54,19 +56,43 @@ user-visible change, per HA custom-integration convention.
   underpins the item schema (alert-only fields). list_id can only be
   changed via the separate `async_step_reconfigure` flow (not the options
   flow), which also migrates the storage key and entity registry entry.
+- **list_id is optional at creation.** In `async_step_user`, if the user
+  leaves the List ID field blank, `config_flow._generate_list_id` derives
+  one from the Name via `homeassistant.util.slugify`, de-duplicating
+  against existing entries' `CONF_LIST_ID` with an incrementing `_2`, `_3`,
+  ... suffix. `async_set_unique_id` + `_abort_if_unique_id_configured()`
+  still run afterwards as the authoritative uniqueness check either way.
 - **max_size**: an entity reference (`input_number`/`counter`) always wins
   over a fixed number if both are somehow set. Eviction is always by
   `created` timestamp, independent of the list's display sort_order.
 - **Notifications only fire on item creation**, never on
-  acknowledge/clear. Two channels: `persistent_notification.create` (with
-  a stable id `entity_list_<list_id>_<item_id>`) and `notify.send_message`
-  per configured target entity (assumes iOS companion app).
+  acknowledge/clear/update. Two channels: `persistent_notification.create`
+  (with a stable id `entity_list_<list_id>_<item_id>`) and
+  `notify.send_message` per configured target entity (assumes iOS
+  companion app).
 - **Stale notify targets**: if a configured notify target entity doesn't
   resolve, a repair issue is raised (`ISSUE_STALE_NOTIFY_TARGET`) instead
   of failing silently; it clears automatically once the target resolves.
 - **An `entity_list_item_created` event fires on the bus for every new
   item**, regardless of `notify_on_create`, so users can build their own
   automations without being limited to the two built-in channels.
+- **update_item is a partial overwrite, keyed by presence in `call.data`.**
+  Its schema fields (`type`, `description`, `url`, `high_priority`) have no
+  defaults, so an omitted field is simply absent from `call.data` and left
+  untouched — only fields the caller actually passed are applied. `name`
+  is deliberately excluded from the schema; renaming an item isn't
+  supported by this service. `high_priority` is only applied when the
+  list is alert-type, mirroring `add_item`'s existing behavior of
+  silently dropping alert-only fields on standard lists.
+  `notify_on_create` is deliberately NOT part of this service's schema —
+  unlike `high_priority`, it isn't really persisted state about the item,
+  it's a one-time instruction consumed at creation to decide whether/how
+  to notify. There's nothing meaningful to "update" about it after the
+  fact, so don't add it here without a real use case driving it.
+- **clear_active_alert's `description` field follows the same
+  presence-based pattern** as `update_item` (`"description" in call.data`,
+  not `.get()`), so it only overwrites the item's description when the
+  caller actually supplies one.
 - **async_migrate_entry is currently a no-op** — all fields added since
   v1 (item description, max_size, max_size_entity) are optional and
   read with `.get()`-style defaults, so old entries keep working
@@ -85,6 +111,18 @@ interruption level. If HA closes this gap, `_send_alert_notification` in
 
 ## Recent changes
 
+- **v1.4.0**:
+  - `clear_active_alert` now accepts an optional `description` field that
+    overwrites the item's description at the same time it's cleared.
+  - Added a new `update_item` service: overwrites any of `type`,
+    `description`, `url`, `high_priority` on an existing item (identified
+    by its current name), leaving unspecified fields untouched. Does not
+    allow renaming an item, and deliberately excludes `notify_on_create`
+    (a creation-time instruction, not persisted item state).
+  - The creation form's List ID field is now optional and moved to the
+    second position (after Name, which is now the only required field on
+    that step). A blank List ID is auto-generated from the Name via
+    `config_flow._generate_list_id`.
 - **v1.3.0**: `_send_alert_notification` now appends the item's
   `description` (if populated) on a new line after the `name (type)`
   line, for both notification channels. Previously the description was
