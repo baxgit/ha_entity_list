@@ -33,9 +33,9 @@ custom_components/entity_list/
                      list_id)
   services.yaml      service field schemas (UI-facing)
   strings.json / translations/en.json  config/options flow UI strings
-  icon.png, icon@2x.png, logo.png, logo@2x.png  local brand images (HA
-  2026.3+ local brand-image support, no home-assistant/brands submission
-  needed)
+  brand/icon.png, brand/icon@2x.png, brand/logo.png, brand/logo@2x.png
+                     local brand images (HA 2026.3+ local brand-image
+                     support, no home-assistant/brands submission needed)
 ```
 
 Current version: see `manifest.json` (`version`). Bump this on any
@@ -109,34 +109,11 @@ support the companion app's advanced `data` payload (custom
 interruption level. If HA closes this gap, `_send_alert_notification` in
 `__init__.py` is the only place that needs updating.
 
-## Recent changes
+## Change history
 
-- **v1.4.1**: The creation form's List type field now has helper text
-  (`data_description`) explaining that choosing Alert leads to a second
-  screen (notification targets) after submitting. Text-only change — no
-  behavior change. Note: HA's generic config-flow form renderer only
-  supports a `description` block above the form and per-field
-  `data_description` helper text below each individual field; there's no
-  native slot for a message pinned below the whole form, so this was
-  attached to the `list_type` field specifically since that's the field
-  the note is actually about.
-- **v1.4.0**:
-  - `clear_active_alert` now accepts an optional `description` field that
-    overwrites the item's description at the same time it's cleared.
-  - Added a new `update_item` service: overwrites any of `type`,
-    `description`, `url`, `high_priority` on an existing item (identified
-    by its current name), leaving unspecified fields untouched. Does not
-    allow renaming an item, and deliberately excludes `notify_on_create`
-    (a creation-time instruction, not persisted item state).
-  - The creation form's List ID field is now optional and moved to the
-    second position (after Name, which is now the only required field on
-    that step). A blank List ID is auto-generated from the Name via
-    `config_flow._generate_list_id`.
-- **v1.3.0**: `_send_alert_notification` now appends the item's
-  `description` (if populated) on a new line after the `name (type)`
-  line, for both notification channels. Previously the description was
-  stored and shown as a sensor attribute but never surfaced in
-  notifications.
+Version-by-version changes now live in `CHANGELOG.md`, not here. When you
+bump `manifest.json`'s `version`, add a matching entry to `CHANGELOG.md`
+instead of this file.
 
 ## Conventions when making changes
 
@@ -146,6 +123,7 @@ interruption level. If HA closes this gap, `_send_alert_notification` in
   — `translations/en.json` is what HA actually loads at runtime;
   `strings.json` is the English source for future translators and isn't
   loaded itself.
-- Bump `manifest.json`'s `version` on user-visible changes.
+- Bump `manifest.json`'s `version` on user-visible changes, and add a
+  corresponding entry to `CHANGELOG.md`.
 - Validate Python files parse (`python3 -m py_compile`) and JSON files
   parse before considering a change done.
