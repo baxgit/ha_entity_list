@@ -1,7 +1,7 @@
 {
   "domain": "entity_list",
   "name": "Entity List",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "documentation": "https://github.com/baxgit/ha_entity_list",
   "issue_tracker": "https://github.com/baxgit/ha_entity_list/issues",
   "config_flow": true,
